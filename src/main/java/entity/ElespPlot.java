@@ -1,7 +1,7 @@
 package entity;
 
 /**
- * Created by Xuan on 2018/1/24.
+ * 电磁点实体类
  */
 public class ElespPlot {
     private double longitude;

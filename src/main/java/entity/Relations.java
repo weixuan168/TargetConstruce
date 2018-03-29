@@ -3,9 +3,9 @@ package entity;
 import org.neo4j.graphdb.RelationshipType;
 
 /**
- * Created by Xuan on 2018/1/24.
+ * Neo4j关系属性枚举类
  */
 public enum Relations implements RelationshipType {
-    CONTAINS,
+    CONTAINS,HAS
 
 }

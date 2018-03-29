@@ -24,6 +24,7 @@ import java.util.Map;
 public class AISRadarFusion extends BaseBasicBolt {
     private Connection conn;
     private Table RadarTracks;
+    //设置阈值，如果两个航迹之间的距离超过阈值，则认为不相关。
     //todo:注意阈值的设定
     private static final double MINDISTANCE = 700;
 
@@ -60,9 +61,10 @@ public class AISRadarFusion extends BaseBasicBolt {
         for (Result result : scanner) {
             String radar_rowKey = Bytes.toString(result.getRow());
             String radar_plots = Bytes.toString(result.getValue(Bytes.toBytes("value"), Bytes.toBytes("plots")));
-            radar_startTime = Long.valueOf(radar_rowKey.substring(1, 12));
-            radar_endTime = Long.valueOf(radar_rowKey.substring(13, 23));
+            radar_startTime = Long.valueOf(radar_rowKey.substring(1, 11));
+            radar_endTime = Long.valueOf(radar_rowKey.substring(12, 22));
 
+            //如果雷达轨迹的结束时间小于ais轨迹的开始时间，或者雷达轨迹的开始时间大于ais轨迹的结束时间，则不进行比较
             if (!(radar_endTime < ais_startTime || radar_startTime > ais_endTime)) {
                 List<RadarPlot> radar_track = new ArrayList<RadarPlot>();
                 for (String radar_plot : radar_plots.split(";")) {

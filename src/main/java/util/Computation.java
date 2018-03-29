@@ -13,6 +13,8 @@ public class Computation {
     static final double MAXDISTANCEOFTRACKS = 700;
     static final int FUSIONYZ = 10;
 
+    //计算两条轨迹之间的距离
+    //todo:要修改
     public static double computeDistanceOfTwoTracks(List<RadarPlot> radarTrack, List<AISPlot> aisTrack) {
         int fusionNumber = 0;
         double fusionSum = 0;

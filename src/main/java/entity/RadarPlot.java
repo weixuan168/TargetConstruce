@@ -1,5 +1,8 @@
 package entity;
 
+/**
+ * 雷达点实体类
+ */
 public class RadarPlot {
     private double longitude;
     private double latitude;

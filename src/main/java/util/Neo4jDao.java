@@ -15,6 +15,7 @@ public class Neo4jDao {
     private Neo4jDao() {
         clearDB();
         graphDB = new GraphDatabaseFactory().newEmbeddedDatabase(new File(DB_PATH));
+
         registerShutdownHook(graphDB);
     }
 

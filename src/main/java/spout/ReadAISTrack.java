@@ -47,7 +47,7 @@ public class ReadAISTrack extends BaseRichSpout {
 
     public void nextTuple() {
         //没有被读过的行记录，没有isRead列；被读过的行记录，isRead列值为true
-        //todo:被读过的行记录，但没有关联上某种手段，如何处理
+        //todo:被读过的行记录，但没有关联上某种手段，如何处理;何时标true
         Scan scan = new Scan();
         SingleColumnValueFilter scvf = new SingleColumnValueFilter(Bytes.toBytes("value"),
                 Bytes.toBytes("isRead"), CompareFilter.CompareOp.NOT_EQUAL, Bytes.toBytes("true"));
@@ -64,9 +64,10 @@ public class ReadAISTrack extends BaseRichSpout {
             String mmsi = Bytes.toString(result.getValue(Bytes.toBytes("value"), Bytes.toBytes("mmsi")));
             String plots = Bytes.toString(result.getValue(Bytes.toBytes("value"), Bytes.toBytes("plots")));
 
-            //todo:注意实际中用的是11位还是13位
-            long ais_startTime = Long.valueOf(rowKey.substring(1, 12));
-            long ais_endTime = Long.valueOf(rowKey.substring(13, 23));
+            //todo:注意实际中用的是10位(秒)还是13位(毫秒）
+            long ais_startTime = Long.valueOf(rowKey.substring(1, 11));
+            long ais_endTime = Long.valueOf(rowKey.substring(12, 22));
+
             List<AISPlot> ais_track = new ArrayList<AISPlot>();
             for (String ais_plot : plots.split(";")) {
                 String[] tmp = ais_plot.split(",");
@@ -85,7 +86,7 @@ public class ReadAISTrack extends BaseRichSpout {
             jsonObject.put("ais_startTime", ais_startTime);
             jsonObject.put("ais_endTime", ais_endTime);
             jsonObject.put("mmsi", mmsi);
-            jsonObject.put("ais_plots",ais_track);
+            jsonObject.put("ais_plots", ais_track);
             collector.emit(new Values(jsonObject));
         }
         try {

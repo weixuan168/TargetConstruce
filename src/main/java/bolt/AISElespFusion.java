@@ -49,8 +49,8 @@ public class AISElespFusion extends BaseBasicBolt {
         long elesp_endTime = 0;
 
         double mindistance = MINDISTANCE;
-        List<String> elespRowkey_final = new ArrayList<String>();
-        List<String> sfc_final = new ArrayList<String>();
+        List<String> elespRowkey_finals = new ArrayList<String>();
+        List<String> sfc_finals = new ArrayList<String>();
         List<Double> distances = new ArrayList<Double>();
         List<String> rowkey_tmp = new ArrayList<String>();
         List<String> sfcs = new ArrayList<String>();
@@ -65,11 +65,10 @@ public class AISElespFusion extends BaseBasicBolt {
         for (Result result : scanner) {
             String elesp_rowKey = Bytes.toString(result.getRow());
             String elesp_plots = Bytes.toString(result.getValue(Bytes.toBytes("value"), Bytes.toBytes("plots")));
-            elesp_startTime = Long.valueOf(elesp_rowKey.substring(1, 12));
-            elesp_endTime = Long.valueOf(elesp_rowKey.substring(13, 23));
+            elesp_startTime = Long.valueOf(elesp_rowKey.substring(1, 11));
+            elesp_endTime = Long.valueOf(elesp_rowKey.substring(13, 22));
             //todo:要不要转int
             String sfc = Bytes.toString(result.getValue(Bytes.toBytes("value"), Bytes.toBytes("sfc")));
-
 
             if (!(elesp_endTime < ais_startTime || elesp_startTime > ais_endTime)) {
                 List<ElespPlot> elesp_track = new ArrayList<ElespPlot>();
@@ -82,10 +81,12 @@ public class AISElespFusion extends BaseBasicBolt {
                     elesp_track.add(elespPlot);
                 }
                 double distance_tmp = Computation.computeDistanceOfTwoTracks(elesp_track, ais_track);
+                //记录所有比较的距离，电磁轨迹行键，中心频率
                 if (distance_tmp < MINDISTANCE) {
                     distances.add(distance_tmp);
                     rowkey_tmp.add(elesp_rowKey);
                     sfcs.add(sfc);
+                    //记录最近的一个距离
                     if (distance_tmp < mindistance) {
                         mindistance = distance_tmp;
                     }
@@ -96,23 +97,23 @@ public class AISElespFusion extends BaseBasicBolt {
         //todo:找distance距离20米（？）以内的轨迹
         for (int i = 0; i < distances.size(); i++) {
             if (distances.get(i) - mindistance < 20) {
-                elespRowkey_final.add(rowkey_tmp.get(i));
-                sfc_final.add(sfcs.get(i));
+                elespRowkey_finals.add(rowkey_tmp.get(i));
+                sfc_finals.add(sfcs.get(i));
             }
         }
 
-        if (elespRowkey_final.isEmpty()) {
+        if (elespRowkey_finals.isEmpty()) {
             //todo:添加是否与电磁关联上标志位？
         } else {
             JSONObject result = new JSONObject();
             result.put("ais_rowkey", ais_rowKey);
-            result.put("elesp_rowkey", elespRowkey_final);
+            result.put("elesp_rowkey", elespRowkey_finals);
             result.put("ais_startTime", ais_startTime);
             result.put("ais_endTime", ais_endTime);
             result.put("elesp_startTime", elesp_startTime);
             result.put("elesp_endTime", elesp_endTime);
             result.put("mmsi", mmsi);
-            result.put("sfc", sfc_final);
+            result.put("sfc", sfc_finals);
             basicOutputCollector.emit(new Values(result));
         }
     }

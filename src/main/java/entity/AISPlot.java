@@ -1,5 +1,8 @@
 package entity;
 
+/**
+ * AIS点实体类
+ */
 public class AISPlot {
     private double longitude;
     private double latitude;
